@@ -1,6 +1,11 @@
 package myApp;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.logging.Logger;
@@ -47,7 +52,8 @@ public class UserResource {
 	
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public void postUser(@FormParam("userId") String userId,@Context HttpServletResponse servletResponse) throws IOException {
+	@Produces(MediaType.TEXT_HTML )
+	public void postUser(@FormParam("userId") String userId,@Context HttpServletResponse response) throws IOException {
 		
 		LOG.info("------------------line 55: create " + userId);
 		User user = new User();
@@ -62,11 +68,43 @@ public class UserResource {
 		
 	    SecretKey sk = kg.generateKey();
 	    String encodedKey = DatatypeConverter.printBase64Binary(sk.getEncoded());
-	    LOG.info("------------------line 72: encodedKey is: " + encodedKey); 
+	    LOG.info("------------------line 65: encodedKey is: " + encodedKey); 
 
 		user.setUserSecret(encodedKey);	
 		UserDao.instance.create(user);
-		servletResponse.sendRedirect("../register.html");
+		 LOG.info("------------------line 69: user created "); 
+		 		
+		response.sendRedirect("http://localhost:8080/BookShopOnline/rest/users/"+userId);
+		
+		 
+		/* FileWriter fWriter = null;
+		 BufferedWriter writer = null;
+		 try {
+		     fWriter = new FileWriter("../register.html");
+		     writer = new BufferedWriter(fWriter);
+		     writer.write("<span>This iss your html content here</span>");		    
+		     writer.close(); //make sure you close the writer object 
+		     LOG.info("------------------line 81: write to file successfully "); 
+		 } catch (Exception e) {
+			 LOG.info("------------------line 83: write to file UN-successfully "); 
+		 }	 
+		 StringBuilder contentBuilder = new StringBuilder();
+		 try {
+		     BufferedReader in = new BufferedReader(new FileReader("../register.html"));
+		     String str;
+		     while ((str = in.readLine()) != null) {
+		         contentBuilder.append(str);
+		     }
+		     in.close();
+		 } catch (IOException e) {
+		 }
+		 String content = contentBuilder.toString();
+		 LOG.info("------------------line 100:  " + content); 
+		 servletResponse.setStatus(201);
+		 servletResponse.setHeader(userId, encodedKey);
+		//servletResponse.sendRedirect("../register.html");
+*/	
+		
 	}
 	
 

@@ -11,10 +11,16 @@ import java.sql.*;
 public enum BookDao {
   instance;
 	
-	String url = "jdbc:mysql://localhost:3307/";
+	/*	String url = "jdbc:mysql://localhost:3307/";
 	String dbName = "BookShop";
 	String userName = "root";
-	String password = "admin";
+	String password = "admin";*/	
+	
+	String url = "jdbc:mysql://localhost:3306/";
+	String dbName = "BookShop";
+	String userName = "root";
+	String password = "Change01";
+	
 	Connection con = null;
 	Statement stmt = null;
 	ResultSet rs = null;
