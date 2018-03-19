@@ -1,6 +1,8 @@
 package myApp;
 
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -67,8 +69,8 @@ public class BookResource {
 
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public void postBook(@FormParam("bookName") String bookName, @FormParam("bookAuthor") String bookAuthor,	@FormParam("bookPrice") String bookPrice, @QueryParam("userId") String userId, @HeaderParam("Authentication") String hMACClient, @Context HttpServletResponse servletResponse) throws IOException {
-		LOG.info("-----------------line 45: create " + bookName);
+	public Book postBook(@FormParam("bookName") String bookName, @FormParam("bookAuthor") String bookAuthor,	@FormParam("bookPrice") String bookPrice, @QueryParam("userId") String userId, @HeaderParam("Authentication") String hMACClient, @Context HttpServletResponse servletResponse) throws Exception {
+		LOG.info("-----------------line 71: create " + bookName);
 		Book book = new Book();
 		if(bookName==null){
 			bookName="Default";
@@ -81,35 +83,74 @@ public class BookResource {
 		Double bookPriceDouble = 0.0; 
 		System.out.println(bookPrice);
 		if(bookPrice != null) {
-			System.out.println(bookPrice);
 		    bookPriceDouble = Double.parseDouble(bookPrice);
-		    System.out.println(bookPriceDouble);
 		}
 		book.setBookPrice(bookPriceDouble);
 		
 		String secret = UserDao.instance.getUser(userId).getUserSecret();
 		SecretKey secretKey = ClientBookShop.getBase64DecodedKey(secret);
 		String hMACServer  = ClientBookShop.getBase64EncodedHMAC(bookName+bookAuthor+bookPrice+userId, secretKey);
+
+		java.util.Date date= new java.util.Date();
+        Timestamp timeSt = new Timestamp(date.getTime());
+		String requestType = "POST";
+		Record newRecord = new Record();
+		newRecord.setTimeSt(timeSt);
+		newRecord.setRequestType(requestType);
+		newRecord.setUserId(userId);
 		
-		if(hMACServer.equals(hMACClient)) {
-			BookDao.instance.create(book);
+		
+		if(hMACServer.equals(hMACClient) ) {
+			LOG.info("----------line95 : ");
+			String accessStatus = "Allowed";
+			newRecord.setAccessStatus(accessStatus);
+			RecordDao.instance.create(newRecord);
+			
+			return BookDao.instance.create(book);
+			//record this
 		}else {
-			 throw new HTTPException(HttpServletResponse.SC_FORBIDDEN);
+			LOG.info("----------line99 : ");
+			
+			String accessStatus = "Denied";
+			newRecord.setAccessStatus(accessStatus);
+			RecordDao.instance.create(newRecord);
+			
+			return null;
 		}	
 		
 	}
 
 	@DELETE	
 	@Path("{bookName}")
-	public void deleteBook(@PathParam("bookName") String bookName,@QueryParam("userId") String userId, @HeaderParam("Authentication") String hMACClient) throws IOException {
+	public void deleteBook(@PathParam("bookName") String bookName,@QueryParam("userId") String userId, @HeaderParam("Authentication") String hMACClient) throws Exception {
 		LOG.info("-------------line 70: delete " + bookName);
 		String secret = UserDao.instance.getUser(userId).getUserSecret();
 		SecretKey secretKey = ClientBookShop.getBase64DecodedKey(secret);
 		String hMACServer  = ClientBookShop.getBase64EncodedHMAC(bookName+userId, secretKey);
 		
-		if(hMACServer.equals(hMACClient)) {
+		java.util.Date date= new java.util.Date();
+        Timestamp timeSt = new Timestamp(date.getTime());
+		String requestType = "DELETE";
+		Record newRecord = new Record();
+		newRecord.setTimeSt(timeSt);
+		newRecord.setRequestType(requestType);
+		newRecord.setUserId(userId);
+		
+		if(hMACServer.equals(hMACClient) ) {
+			LOG.info("--------line 114: ");
+			
+			String accessStatus = "Allowed";
+			newRecord.setAccessStatus(accessStatus);
+			RecordDao.instance.create(newRecord);
+			
 			BookDao.instance.delete(bookName);
+			//record this
 		}else {
+			LOG.info("--------line 118: ");
+			String accessStatus = "Denied";
+			newRecord.setAccessStatus(accessStatus);
+			RecordDao.instance.create(newRecord);
+			
 			throw new HTTPException(HttpServletResponse.SC_FORBIDDEN);
 		}	
 		

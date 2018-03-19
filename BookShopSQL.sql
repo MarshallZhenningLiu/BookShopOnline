@@ -15,11 +15,16 @@ CREATE TABLE Book(
 	bookAuthor VARCHAR(50) NOT NULL,
 	bookPrice DECIMAL(6,2) NOT NULL,
 	PRIMARY KEY(bookName) );
-	
-    
-INSERT INTO User(userId,userSecret) VALUES("user1", "secret1");
-INSERT INTO User(userId,userSecret) VALUES("user2", "secret2");
-INSERT INTO User(userId,userSecret) VALUES("user3", "secret3");
+
+DROP TABLE IF EXISTS Record;
+CREATE TABLE Record(
+	userId VARCHAR(50) NOT NULL,
+    requestType VARCHAR(50) NOT NULL,
+    timeSt TIMESTAMP NOT NULL,
+	accessStatus VARCHAR(50) NOT NULL,
+	PRIMARY KEY(timeSt) );
+
+
 
 INSERT INTO Book(bookName, bookAuthor, bookPrice) VALUES("book1", "author1", 10);
 INSERT INTO Book(bookName, bookAuthor, bookPrice) VALUES("book2", "author1", 20);
@@ -29,4 +34,4 @@ SELECT * from User;
 
 SELECT * from Book;
 
-
+select * from Record;

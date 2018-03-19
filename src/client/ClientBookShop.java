@@ -40,7 +40,7 @@ public class ClientBookShop {
 	if(args!=null && args.length>1) {
 		user=args[0];
 		secret=args[1];
-		LOG.info("-----------------line 31: " + user + " " + secret);
+		//LOG.info("-----------------line 31: " + user + " " + secret);
 	}else {
 		System.out.println("!!! --- Error with user name or secret key ---");
 	}
@@ -67,8 +67,11 @@ public class ClientBookShop {
                 break;
             case 4:
                 deleteBookByName(user,secret);
-                break;           
+                break;   
             case 5:
+                getRequestRecords(user,secret);
+                break; 
+            case 6:
                 System.out.println("Exiting...");
                 userContinue = "n";
                 break;
@@ -96,11 +99,14 @@ public class ClientBookShop {
 	    	String hMAC  = getBase64EncodedHMAC(name+userId, secretKey); 
 		    
 			try{
-				service.path("rest").path("books").path(name).queryParam("userId", userId).header("Authentication", hMAC).delete();	
+				
+				service.path("rest").path("books").path(name).queryParam("userId", userId).header("Authentication", hMAC).delete();
+				
 				System.out.println(name + " is deleted.");
 			}catch(Exception e){
 			    	System.out.println("!!! --- Error with deleting this book. ---");
 			}		
+			
 		
 	}
 	
@@ -140,13 +146,34 @@ public class ClientBookShop {
 	    
 	    SecretKey secretKey = getBase64DecodedKey(secret);
     	String hMAC  = getBase64EncodedHMAC(name+author+price+userId, secretKey); 
-	    try{
+    	
+    	try{ 	    	
+ 	    	service.path("rest").path("books").queryParam("userId", userId).header("Authentication", hMAC).type(MediaType.APPLICATION_FORM_URLENCODED).post(ClientResponse.class, form);
+ 	    }catch(Exception e){
+ 	    	//e.printStackTrace();
+ 	    	System.out.println("!!! --- Error with creating this book. ---");
+ 	    }
+    	
+    	
+    	/*if(service.path("rest").path("books").queryParam("userId", userId).header("Authentication", hMAC).type(MediaType.APPLICATION_FORM_URLENCODED).post(ClientResponse.class, form)==null) {
+    		System.out.println("!!! --- Error with creating this book. ---");
+    	}else {
+    		//System.out.println(name + " is created.");
+    		service.path("rest").path("books").queryParam("userId", userId).header("Authentication", hMAC).type(MediaType.APPLICATION_FORM_URLENCODED).post(ClientResponse.class, form);
+    		//System.out.println(name + " is here.");
+    	}
+    	*/
+    	
+	   /* try{
+	    	
 	    	service.path("rest").path("books").queryParam("userId", userId).header("Authentication", hMAC).type(MediaType.APPLICATION_FORM_URLENCODED).post(ClientResponse.class, form);
+	    	
 	    	System.out.println(name + " is created.");
 	    }catch(Exception e){
-	    	e.printStackTrace();
+	    	//e.printStackTrace();
 	    	System.out.println("!!! --- Error with creating this book. ---");
-	    }
+	    }*/
+	    
 	}
 
 
@@ -164,9 +191,9 @@ public class ClientBookShop {
 	    	String hMAC  = getBase64EncodedHMAC(name+userId, secretKey); 
 			try {
 				System.out.println(service.path("rest").path("books").path(name).queryParam("userId", userId).header("Authentication", hMAC).accept(MediaType.APPLICATION_JSON).get(String.class));
-			
+				
 			} catch (Exception e) {
-				e.printStackTrace();
+				//e.printStackTrace();
 				System.out.println("!!! --- Error with finding this book. ---");
 			}
 		
@@ -182,8 +209,21 @@ public class ClientBookShop {
 			try {
 				System.out.println(service.path("rest").path("books").queryParam("userId", userId).header("Authentication", hMAC).accept(MediaType.APPLICATION_JSON).get(String.class));
 			} catch (Exception e) {
-				e.printStackTrace();
+				//e.printStackTrace();
 				System.out.println("!!! --- Error with finding books. ---");
+			} 		
+    }
+    
+  //------------------- GET   
+    public static void getRequestRecords(String userId, String secret){    	
+    		SecretKey secretKey = getBase64DecodedKey(secret);
+    		String hMAC  = getBase64EncodedHMAC(userId, secretKey); 
+    	
+			try {
+				System.out.println(service.path("rest").path("records").queryParam("userId", userId).header("Authentication", hMAC).accept(MediaType.APPLICATION_JSON).get(String.class));
+			} catch (Exception e) {
+				//e.printStackTrace();
+				System.out.println("!!! --- Error with finding request records. ---");
 			} 		
     }
     
@@ -202,7 +242,7 @@ public class ClientBookShop {
 			mac.init(secretKey);
 			byte[] hmac = mac.doFinal(message.getBytes());
 			String encodedHmac  = Base64.getEncoder().encodeToString(hmac);
-			LOG.info("line 177: encoded hamc is " + encodedHmac);
+			//LOG.info("line 177: encoded hamc is " + encodedHmac);
 			return encodedHmac;
 			
 		} catch (Exception e) {			
@@ -220,7 +260,8 @@ public class ClientBookShop {
       System.out.println("2. Get a book by bookname");
       System.out.println("3. Create a book");
       System.out.println("4. Delete a book by bookname");
-      System.out.println("5. Exit");
+      System.out.println("5. Show Post/Delete log");
+      System.out.println("6. Exit");
       System.out.print("Enter choice --> ");
       Scanner sc = new Scanner(System.in);
       return sc.nextInt();

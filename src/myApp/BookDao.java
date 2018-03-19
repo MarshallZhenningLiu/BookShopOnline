@@ -70,6 +70,7 @@ public enum BookDao {
 	    	}
 	    }catch(Exception e) {
 	    	e.printStackTrace();
+	    	return null;
 	    }finally {
 	    	if(rs!=null) {	try{rs.close();}catch(Exception e) {e.printStackTrace(); }}
 	    	if(stmt!=null) {	try{stmt.close();}catch(Exception e) {e.printStackTrace(); }}
@@ -80,7 +81,7 @@ public enum BookDao {
  
   }
 
-  public void create(Book book) {
+  public Book create(Book book) {
 	  LOG.info("--------create line45: " + book.getBookName());
 	  
 	  String bookName = book.getBookName();
@@ -105,7 +106,8 @@ public enum BookDao {
 	    }
 	  
 	  
-    booksMap.put(book.getBookName(), book);
+    //booksMap.put(book.getBookName(), book);
+    return book;
   }
 
   public void delete(String bookName) {
